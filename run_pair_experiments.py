@@ -214,8 +214,9 @@ def run_direction(
             f"K={args.current_top_k}, fixed={num_fixed} ==="
         )
         model = build_model(args, num_classes=target_info.num_classes).to(device)
-        load_source_trunk_weights(model, source_ckpt_path, device=device)
-        if args.freeze_fixed_experts:
+        if num_fixed > 0:
+            load_source_trunk_weights(model, source_ckpt_path, device=device)
+        if args.freeze_fixed_experts and num_fixed > 0:
             freeze_fixed_experts(model, fixed_profile)
 
         transfer_fit = fit_model(
@@ -248,7 +249,7 @@ def run_direction(
             "num_fixed": num_fixed,
             "fixed_mass_mode": args.fixed_mass_mode,
             "freeze_fixed_experts": int(args.freeze_fixed_experts),
-            "source_checkpoint": source_ckpt_path,
+            "source_checkpoint": source_ckpt_path if num_fixed > 0 else None,
             "profile_path": profile_path,
             "transfer_run_dir": transfer_run_dir,
             "best_epoch": transfer_fit.best_epoch,
